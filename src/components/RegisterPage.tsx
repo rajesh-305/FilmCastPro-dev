@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { User, Mail, Lock, Camera, MapPin } from 'lucide-react';
 import { filmRoles } from '../data/pricing';
 import { FilmRole, PricingPlan } from '../types';
+import { useAuth } from '../context/AuthContext';
 
 interface RegisterPageProps {
   onPageChange: (page: string) => void;
 }
 
 export const RegisterPage: React.FC<RegisterPageProps> = ({ onPageChange }) => {
+  const { signUp } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -20,6 +22,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onPageChange }) => {
   });
 
   const [step, setStep] = useState(1);
+  const [error, setError] = useState<string | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -28,10 +31,18 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onPageChange }) => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here would be the registration logic
-    console.log('Registration data:', formData);
+    setError(null);
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    const result = await signUp(formData.email, formData.password);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
     onPageChange('dashboard');
   };
 
@@ -72,6 +83,9 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onPageChange }) => {
           </div>
 
           <form onSubmit={handleSubmit}>
+            {error && (
+              <div className="text-red-400 text-sm mb-4" role="alert">{error}</div>
+            )}
             {/* Step 1: Basic Information */}
             {step === 1 && (
               <div className="space-y-6">

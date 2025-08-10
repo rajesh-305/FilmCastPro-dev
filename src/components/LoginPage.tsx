@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { Mail, Lock, Film } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface LoginPageProps {
   onPageChange: (page: string) => void;
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onPageChange }) => {
+  const { signIn, signInWithGoogle } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     rememberMe: false
   });
+  const [error, setError] = useState<string | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -20,10 +23,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onPageChange }) => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here would be the login logic
-    console.log('Login data:', formData);
+    setError(null);
+    const result = await signIn(formData.email, formData.password);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
     onPageChange('dashboard');
   };
 
@@ -44,6 +51,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onPageChange }) => {
 
         <div className="bg-gray-800 rounded-2xl shadow-xl p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="text-red-400 text-sm" role="alert">{error}</div>
+            )}
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
@@ -120,11 +130,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onPageChange }) => {
               </div>
             </div>
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <button className="w-full py-2 px-4 border border-gray-600 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors">
+              <button
+                type="button"
+                onClick={async () => {
+                  setError(null);
+                  const result = await signInWithGoogle();
+                  if (result.error) setError(result.error);
+                }}
+                className="w-full py-2 px-4 border border-gray-600 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors"
+              >
                 Google
               </button>
-              <button className="w-full py-2 px-4 border border-gray-600 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors">
-                LinkedIn
+              <button className="w-full py-2 px-4 border border-gray-600 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors" disabled>
+                LinkedIn (coming soon)
               </button>
             </div>
           </div>

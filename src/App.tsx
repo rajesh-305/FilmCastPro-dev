@@ -6,6 +6,7 @@ import { RegisterPage } from './components/RegisterPage';
 import { LoginPage } from './components/LoginPage';
 import { BrowsePage } from './components/BrowsePage';
 import { AboutPage } from './components/AboutPage';
+import { DashboardPage } from './components/DashboardPage';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -22,8 +23,12 @@ function App() {
         return <LoginPage onPageChange={setCurrentPage} />;
       case 'browse':
         return <BrowsePage onPageChange={setCurrentPage} />;
+      case 'search':
+        return <BrowsePage onPageChange={setCurrentPage} />;
       case 'about':
         return <AboutPage onPageChange={setCurrentPage} />;
+      case 'dashboard':
+        return <DashboardPage onPageChange={setCurrentPage} />;
       default:
         return <HomePage onPageChange={setCurrentPage} />;
     }
