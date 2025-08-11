@@ -1,11 +1,13 @@
 import React from 'react';
 import { Star, Users, Camera, Award, ArrowRight } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface HomePageProps {
   onPageChange: (page: string) => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({ onPageChange }) => {
+  const { user } = useAuth();
   const features = [
     {
       icon: Users,
@@ -59,21 +61,32 @@ export const HomePage: React.FC<HomePageProps> = ({ onPageChange }) => {
             Connect with industry professionals, showcase your portfolio, and discover opportunities 
             in the world of filmmaking.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button 
-              onClick={() => onPageChange('register')}
-              className="bg-yellow-400 text-gray-900 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-yellow-300 transition-all transform hover:scale-105 flex items-center justify-center"
-            >
-              Start Your Journey
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </button>
-            <button 
-              onClick={() => onPageChange('browse')}
-              className="border-2 border-yellow-400 text-yellow-400 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-yellow-400 hover:text-gray-900 transition-all"
-            >
-              Browse Talent
-            </button>
-          </div>
+          {!user ? (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button 
+                onClick={() => onPageChange('register')}
+                className="bg-yellow-400 text-gray-900 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-yellow-300 transition-all transform hover:scale-105 flex items-center justify-center"
+              >
+                Start Your Journey
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </button>
+              <button 
+                onClick={() => onPageChange('browse')}
+                className="border-2 border-yellow-400 text-yellow-400 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-yellow-400 hover:text-gray-900 transition-all"
+              >
+                Browse Talent
+              </button>
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <button 
+                onClick={() => onPageChange('browse')}
+                className="bg-yellow-400 text-gray-900 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-yellow-300 transition-all transform hover:scale-105"
+              >
+                Browse Talent
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -149,12 +162,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onPageChange }) => {
           <p className="text-gray-800 text-lg mb-8">
             Join thousands of film professionals who are already building their careers with FilmCast Pro.
           </p>
-          <button 
-            onClick={() => onPageChange('register')}
-            className="bg-gray-900 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-800 transition-all transform hover:scale-105"
-          >
-            Create Your Profile Today
-          </button>
+          {!user && (
+            <button 
+              onClick={() => onPageChange('register')}
+              className="bg-gray-900 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-800 transition-all transform hover:scale-105"
+            >
+              Create Your Profile Today
+            </button>
+          )}
         </div>
       </section>
     </div>

@@ -1,11 +1,13 @@
 import React from 'react';
 import { Users, Target, Award, Heart } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface AboutPageProps {
   onPageChange: (page: string) => void;
 }
 
 export const AboutPage: React.FC<AboutPageProps> = ({ onPageChange }) => {
+  const { user } = useAuth();
   const values = [
     {
       icon: Users,
@@ -88,12 +90,14 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onPageChange }) => {
                 to catering services - can build their presence and connect with projects that 
                 match their skills and passion.
               </p>
-              <button
-                onClick={() => onPageChange('register')}
-                className="bg-yellow-400 text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-yellow-300 transition-colors"
-              >
-                Join Our Community
-              </button>
+              {!user && (
+                <button
+                  onClick={() => onPageChange('register')}
+                  className="bg-yellow-400 text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-yellow-300 transition-colors"
+                >
+                  Join Our Community
+                </button>
+              )}
             </div>
             <div className="relative">
               <img
@@ -197,12 +201,14 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onPageChange }) => {
             Start building your professional profile today and connect with opportunities 
             that match your passion and skills.
           </p>
-          <button
-            onClick={() => onPageChange('register')}
-            className="bg-gray-900 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-800 transition-all transform hover:scale-105"
-          >
-            Get Started Now
-          </button>
+          {!user && (
+            <button
+              onClick={() => onPageChange('register')}
+              className="bg-gray-900 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-800 transition-all transform hover:scale-105"
+            >
+              Get Started Now
+            </button>
+          )}
         </div>
       </section>
     </div>
