@@ -7,6 +7,8 @@ import {
 import { useAuth } from '../context/AuthContext';
 import '../HomePage.css';
 import { useNavigate } from 'react-router-dom';
+import {filmRoles} from '../data/pricing';
+const roles = filmRoles.slice(0,-1);
 
 const videoSlides = [
   {
@@ -91,10 +93,6 @@ const [isPaused, setIsPaused] = useState(false);
     }
   ];
 
-  const roles = [
-    'Producers', 'Directors', 'Musicians', 'Actors', 'VFX Artists', 'Cameramen',
-    'Costume Designers', 'Makeup Artists', 'Lighting Technicians', 'Acting Trainers', 'Script Writers'
-  ];
 
   return (
     <div className="min-h-screen bg-gray-900">
@@ -181,7 +179,7 @@ const [isPaused, setIsPaused] = useState(false);
           {!user ? (
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button 
-                onClick={() => ('register')}
+                onClick={() => nagivate('register')}
                 className="bg-yellow-400 text-gray-900 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-yellow-300 transition-all transform hover:scale-105 flex items-center justify-center"
               >
                 Start Your Journey

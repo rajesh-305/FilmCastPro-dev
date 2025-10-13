@@ -11,7 +11,7 @@ type Experience = {
   duration: string;
   description: string;
 };
-interface Profile {  
+export interface Profile {  
   id: string | null; 
   name: string | null;            
   bio: string | null;             
@@ -23,9 +23,21 @@ interface Profile {
   experience : Experience[] | null 
   rating : number |  null;  
   signedProfilePhoto : string | null
+  signedCoverPhoto : string | null
 }
 
+export const getSignedURL=async(path:string | null)=>{
+    if(!path){
+      return null
+    }
+      const { data, error } = await supabase.storage.from('profile-photos').createSignedUrl(path,3600);
 
+    if(error){
+      console.log(error);
+      return null;
+    }
+    return data?.signedUrl ?? null;
+  } 
 
 export const BrowsePage: React.FC = () => {
   const navigate = useNavigate();
@@ -42,18 +54,7 @@ const order: Record<plan, number> = {
   gold: 3
 };
 
-  const getSignedURL=async(path:string | null)=>{
-    if(!path){
-      return null
-    }
-      const { data, error } = await supabase.storage.from('profile-photos').createSignedUrl(path,3600);
 
-    if(error){
-      console.log(error);
-      return null;
-    }
-    return data?.signedUrl ?? null;
-  } 
 
   const filteredProfiles = mockProfiles?.filter(profile => {
     const matchesSearch = profile.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -83,7 +84,10 @@ const order: Record<plan, number> = {
   const profileswithSignedUrls: Profile[] = await Promise.all(
     profilesArray.map(async(profile:Profile)=>{
       const signedPhotoURL = await getSignedURL(profile.profilePhoto);
-      return {...profile, signedProfilePhoto:signedPhotoURL}
+      const signedCoverURL = await getSignedURL(profile.coverPhoto);
+      return {...profile, signedProfilePhoto:signedPhotoURL,
+        signedCoverPhoto : signedCoverURL
+      }
     })
   );
   setmockProfiles(profileswithSignedUrls);
@@ -187,19 +191,19 @@ const order: Record<plan, number> = {
                 </div>
               </div> */}
             <div className="relative w-full aspect-[16/9] bg-gray-200 rounded-t-lg overflow-hidden">
-  <img
-    src={profile.signedProfilePhoto ?? ""}
-    alt={profile.name ?? ""}
-    className="w-full h-full object-cover"
-  />
-  <div
-    className={`absolute top-4 right-4 px-2 py-1 rounded-full text-xs font-semibold ${getPlanBadgeColor(
-      profile.plan ?? ""
-    )}`}
-  >
-    {profile.plan?.toUpperCase()}
-  </div>
-</div>
+              <img
+                src={profile.signedProfilePhoto ?? ""}
+                alt={profile.name ?? ""}
+                className="w-full h-full object-cover"
+              />
+              <div
+                className={`absolute top-4 right-4 px-2 py-1 rounded-full text-xs font-semibold ${getPlanBadgeColor(
+                  profile.plan ?? ""
+                )}`}
+              >
+                {profile.plan?.toUpperCase()}
+              </div>
+            </div>
 
               
               <div className="p-6">

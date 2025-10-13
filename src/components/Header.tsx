@@ -3,10 +3,8 @@ import { Film, Menu, X, Search } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate, useLocation } from 'react-router-dom';
-interface Profile {
-  user_id: string;
-  plan: 'free' | 'silver' | 'gold';
-}
+import {getSignedURL,Profile} from './BrowsePage';
+
 
 
 export const Header: React.FC = () => {
@@ -15,24 +13,36 @@ export const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
- 
-const getData = async () => {
+
+ const getData = async () => {
   if (!user) return; 
 
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
     .eq('user_id', user.id).single();
-
     console.log(data);
 
   if (error) {
     console.error('Error fetching user data:', error);
+    return;
   } else {
-    console.log('User data:', data);
-    setProfile(data);
+    if(data && (data.profilePhoto || data.coverPhoto)){
+      const signedProfilePhotoURL = await getSignedURL(data.profilePhoto);
+      const signedCoverPhotoURL = await getSignedURL(data.coverPhoto);
+      const finalProfileData = {
+        ...data,
+        signedProfilePhoto:signedProfilePhotoURL,
+        signedCoverPhoto:signedCoverPhotoURL
+      }
+      console.log('User data:', data);
+      setProfile(finalProfileData);
+
+    }
   }
 };
+ 
+
   const navItems = [
     { id: '/', label: 'Home' },
     { id: 'browse', label: 'Browse Talent' },

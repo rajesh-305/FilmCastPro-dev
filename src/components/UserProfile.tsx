@@ -334,146 +334,141 @@ const handleDeleteCoverPhoto = () => {
 
 return (
     <>
-      <div className="bg-gray-900 min-h-screen flex flex-col items-center">
-        <div className="w-full max-w-5xl bg-gray-900 px-4 md:px-8">
-          
-          <div className="relative bg-gray-800 rounded-lg overflow-hidden">
-            
-          <div className="h-48 w-full">
-            <img
-              src={ProfileData.coverPhoto || "https://tse1.mm.bing.net/th/id/OIP.Ap7CXl8VCxaeqDKo1uRYTAHaB2?pid=Api&P=0&h=180"} 
-              alt="Cover"
-              className="w-full h-full object-cover"
-            />
+<div className="bg-gray-900 min-h-screen p-4 sm:p-6 lg:p-8">
+  <div className="w-full max-w-5xl mx-auto">
+    
+    {/* ======================= Header Section ======================= */}
+    <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+      <img
+        src={ProfileData.coverPhoto || "https://images.unsplash.com/photo-1574717521945-40345513f556?q=80&w=2070&auto=format&fit=crop"}
+        alt="Cover"
+        className="w-full h-48 object-cover"
+      />
+      <div className="p-6 relative">
+        <div className="absolute left-6 md:left-10 -top-16">
+          <img
+            src={ProfileData.profilePhoto || "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1961&auto=format&fit=crop"}
+            alt="Profile"
+            className="w-32 h-32 rounded-full border-4 border-gray-800 shadow-md"
+          />
+        </div>
+        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between">
+          <div className="mt-16 sm:mt-0 sm:ml-40 flex-grow">
+            <h1 className="text-3xl font-bold text-white">{ProfileData.name || "Eleanor Vance"}</h1>
+            <p className="text-yellow-400 text-lg">{ProfileData.role || "Director of Photography"}</p>
+            <p className="text-gray-400 text-sm">{ProfileData.location || "Crafting visual narratives with light and shadow."}</p>
           </div>
-
-          <div className="relative flex flex-col md:flex-row items-center md:items-end p-6">
-              
-            <div className="absolute -top-16 md:-top-20 left-1/2 md:left-10 transform -translate-x-1/2 md:translate-x-0 profile">
-              <img
-                src={ProfileData.profilePhoto || "https://tse3.mm.bing.net/th/id/OIP.apRNXJkvlf4bc55gw0dXLQHaHa?pid=Api&P=0&h=180"}
-                alt="Profile"
-                className="w-32 h-32 rounded-full border-4 border-white shadow-lg"
-                />
+          <div className="mt-4 sm:mt-0 flex items-center gap-4 text-sm whitespace-nowrap">
+            <div className="text-center">
+              <p className="font-bold text-white">1250</p>
+              <p className="text-gray-400">Connections</p>
             </div>
-
-            <div className="mt-20 md:mt-0 md:ml-40 text-center md:text-left">
-              <h1 className="text-2xl font-bold text-white">
-                {ProfileData.name}
-              </h1>
-              <p className="text-gray-300 text-lg">
-                {ProfileData.role || ""}
-              </p>
-              <p className="text-gray-400">
-                {ProfileData.location || ""}
-              </p>
+            <div className="text-center">
+              <p className="font-bold text-white">42</p>
+              <p className="text-gray-400">Projects</p>
             </div>
-
-            <div className="ml-auto mt-4 md:mt-0">
-              <button
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700"
-                onClick={() => {
-                  setUpdateProfileData(JSON.parse(JSON.stringify(ProfileData)));
-                  setModal(true);
-                }}
-
-                >Edit Profile
-              </button>
-            </div>
+           <button className="bg-yellow-500 text-black px-4 py-2 rounded-lg shadow hover:bg-yellow-400 transition duration-300 font-medium" onClick={() => { setUpdateProfileData({ ...ProfileData }); setModal(true); }} > Edit Profile </button>
           </div>
         </div>
-
-          <div className="mt-8 bg-white p-6 rounded-lg shadow-lg">
-            <h3 className="text-gray-900 text-xl font-semibold mb-3">About</h3>
-            <p className="text-gray-700 text-base">
-              {ProfileData.bio || "Nothing great added yet."}
-            </p>
-          </div>
-
-          <div className="mt-6 bg-white p-6 rounded-lg shadow-lg">
-            <h3 className="text-gray-900 text-xl font-semibold mb-3">
-              Experience
-            </h3>
-            {ProfileData.experience && ProfileData.experience.length > 0 ? (
-              ProfileData.experience.map((exp, i) => (
-                <div
-                  key={i}
-                  className="mb-4 pb-4 border-b border-gray-200 last:border-b-0 last:pb-0"
-                >
-                  <h4 className="text-lg font-medium text-gray-800">
-                    {exp.role}
-                  </h4>
-                  <p className="text-gray-600">{exp.company}</p>
-                  <p className="text-gray-500 text-sm">{exp.duration}</p>
-                  <p className="text-gray-700 mt-2">{exp.description}</p>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-700">
-                No experience added yet. Add experience to enhance your profile.
-              </p>
-            )}
-          </div>
-
-          <div className="mt-6 bg-white p-6 rounded-lg shadow-lg">
-            <h3 className="text-gray-900 text-xl font-semibold mb-3">
-              Education
-            </h3>
-            {ProfileData.education && ProfileData.education.length > 0 ? (
-              ProfileData.education.map((edu, idx) => (
-                <div
-                  key={idx}
-                  className="mb-4 pb-4 border-b border-gray-200 last:border-b-0 last:pb-0"
-                >
-                  <h5 className="text-lg font-medium text-gray-800">
-                    {edu.course}
-                  </h5>
-
-                  <p className="text-gray-700">{edu.institute}</p>
-
-                  <small className="text-gray-500 block mb-2">
-                    {edu.duration}
-                  </small>
-
-                
-                  {edu.description && (
-                    <p className="mt-2 text-gray-600">{edu.description}</p>
-                  )}
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-700">
-                No education added yet. Add education to enhance your profile.
-              </p>
-            )}
-          </div>
       </div>
-
-
-
-<div className="mt-6 bg-white p-6 rounded-lg shadow-lg skills">
-  <h3 className="text-gray-900 text-xl font-semibold mb-3">Skills</h3>
-  {ProfileData.skills?.length > 0 ? (
-    <div className="flex flex-wrap gap-3">
-      {ProfileData.skills.map((skill, index) => (
-        <span
-          key={index}
-          className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium shadow hover:bg-blue-200 transition"
-        >
-          {skill}
-        </span>
-      ))}
     </div>
-  ) : (
-    <p className="text-gray-700">
-      No skills added yet. Add skills to enhance your profile.
-    </p>
-  )}
-</div>
 
+    {/* ======================= About Me Section ======================= */}
+    <div className="mt-8 bg-gray-800 p-6 rounded-lg shadow-lg">
+      <h3 className="text-white text-xl font-bold mb-3">About Me</h3>
+      <p className="text-gray-300 text-base">
+        {ProfileData.bio || "Eleanor is an award-winning Director of Photography with over 15 years of experience..."}
+      </p>
+    </div>
 
-
+    {/* ======================= Experience & Filmography Section ======================= */}
+    <div className="mt-6 bg-gray-800 p-6 rounded-lg shadow-lg">
+      <h3 className="text-white text-xl font-bold mb-4">Experience & Filmography</h3>
+       <hr className="my-4 border-2 border-gray-300" />
+      <div className="space-y-6">
+        {ProfileData.experience && ProfileData.experience.length > 0 ? (
+          ProfileData.experience.map((exp, i) => (
+            <div key={i} className="flex flex-col sm:flex-row justify-between sm:items-start border-b border-gray-700 pb-4 last:border-b-0 last:pb-0">
+              <div>
+                <h4 className="text-yellow-400 font-medium">{exp.role || "Director of Photography"}</h4>
+                <p className="text-gray-400 font-medium">{exp.company || "Echoes of the Forgotten"}</p>
+                <p className="text-gray-300 mt-2">{exp.description || "Feature film, a poignant drama exploring themes of memory and loss..."}</p>
+              </div>
+              <span className="bg-gray-700 text-yellow-400 text-xs font-bold px-3 py-1 rounded-full mt-2 sm:mt-0 whitespace-nowrap">{exp.duration || "2023"}</span>
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-400">No experience added yet.</p>
+        )}
       </div>
+    </div>
+    
+    {/* ======================= Education Section (Your New Code) ======================= */}
+    <div className="mt-6 bg-gray-800 p-6 rounded-lg shadow-lg">
+      <h3 className="text-white text-xl font-bold mb-4">Education</h3>
+        <hr className="my-4 border-2 border-gray-300" />
+
+      <div className="space-y-6">
+        {ProfileData?.education?.length > 0 ? (
+          ProfileData.education.map((edu, i) => (
+            <div key={i} className="pt-4 first:pt-0 flex flex-col sm:flex-row justify-between sm:items-start">
+              <div>
+                <h4 className="text-yellow-400 font-medium">{edu.course || "Film School Name"}</h4>
+                <p className="text-gray-400 font-medium">{edu.institute || "Bachelor of Fine Arts"}</p>
+                <p className="text-gray-400 mt-2">{edu.description || "Studied cinematography, film direction, and production techniques."}</p>
+              </div>
+              <span className="bg-gray-700 text-yellow-400 text-xs font-bold px-3 py-1 rounded-full mt-2 sm:mt-0 whitespace-nowrap">
+                {edu.duration || "2010 - 2014"}
+              </span>
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-400">No education added yet.</p>
+        )}
+      </div>
+    </div>
+
+    {/* ======================= Skills & Expertise Section ======================= */}
+    <div className="mt-6 bg-gray-800 p-6 rounded-lg shadow-lg">
+      <h3 className="text-white text-xl font-bold mb-4">Skills & Expertise</h3>
+      {ProfileData.skills?.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {ProfileData.skills.map((skill, index) => (
+            <span key={index} className="bg-gray-700 text-gray-200 px-4 py-2 rounded-md text-sm font-medium">
+              {skill}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <p className="text-gray-400">No skills added yet.</p>
+      )}
+    </div>
+
+    {/* ======================= Portfolio & Social Section ======================= */}
+    <div className="mt-6 bg-gray-800 p-6 rounded-lg shadow-lg">
+      <h3 className="text-white text-xl font-bold mb-4">Portfolio & Social</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <a href="#" className="flex items-center gap-3 text-gray-300 hover:text-yellow-400 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M22 17H2v-2h20v2zm0-4H2v-2h20v2zm0-4H2V7h20v2z"/></svg>
+            <span>IMDb Profile</span>
+          </a>
+          <a href="#" className="flex items-center gap-3 text-gray-300 hover:text-yellow-400 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M10.749 6.22c-2.31 0-3.905 1.547-4.786 4.093l-1.571 5.093h2.934l.75-2.613c.783-2.52 1.393-3.153 2.15-3.153.942 0 1.637.753 1.637 1.838 0 1.25-.972 2.375-3.036 3.256l-1.396.643 2.506 3.125h2.89c.758-2.66 2.31-6.195 4.757-6.195 1.956 0 2.923 1.365 2.923 2.723 0 2.22-.926 3.704-2.835 3.704-1.282 0-1.892-.768-2.597-2.61l-1.427.65c.987 2.457 2.31 3.79 4.318 3.79 3.036 0 4.88-2.062 4.88-5.182 0-2.843-1.822-5.167-5.06-5.167zm-7.653 0c-2.31 0-3.905 1.547-4.786 4.093l-1.571 5.093h2.934l.75-2.613c.783-2.52 1.393-3.153 2.15-3.153.942 0 1.637.753 1.637 1.838 0 1.25-.972 2.375-3.036 3.256l-1.396.643 2.506 3.125h2.89c.758-2.66 2.31-6.195 4.757-6.195 1.956 0 2.923 1.365 2.923 2.723 0 2.22-.926 3.704-2.835 3.704-1.282 0-1.892-.768-2.597-2.61l-1.427.65c.987 2.457 2.31 3.79 4.318 3.79 3.036 0 4.88-2.062 4.88-5.182 0-2.843-1.822-5.167-5.06-5.167z"/></svg>
+            <span>Vimeo Portfolio</span>
+          </a>
+          <a href="#" className="flex items-center gap-3 text-gray-300 hover:text-yellow-400 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.41-7-7.93s3.05-7.44 7-7.93v15.86zm2 0V4.07c3.95.49 7 3.41 7 7.93s-3.05 7.44-7 7.93z"/></svg>
+            <span>Personal Website</span>
+          </a>
+          <a href="#" className="flex items-center gap-3 text-gray-300 hover:text-yellow-400 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            <span>LinkedIn</span>
+          </a>
+      </div>
+    </div>
+
+  </div>
+</div>
 
       {modal && (
         <div
