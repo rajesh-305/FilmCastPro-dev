@@ -340,16 +340,16 @@ return (
     {/* ======================= Header Section ======================= */}
     <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg">
       <img
-        src={ProfileData.coverPhoto || "https://images.unsplash.com/photo-1574717521945-40345513f556?q=80&w=2070&auto=format&fit=crop"}
+        src={ProfileData.coverPhoto || "https://wallpapers.com/images/hd/minimalist-simple-linkedin-background-inmeafna599ltxxm.jpg"}
         alt="Cover"
         className="w-full h-48 object-cover"
       />
       <div className="p-6 relative">
         <div className="absolute left-6 md:left-10 -top-16">
           <img
-            src={ProfileData.profilePhoto || "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1961&auto=format&fit=crop"}
+            src={ProfileData.profilePhoto || "https://www.pngitem.com/pimgs/m/504-5040528_empty-profile-picture-png-transparent-png.png"}
             alt="Profile"
-            className="w-32 h-32 rounded-full border-4 border-gray-800 shadow-md"
+            className="w-32 h-32 rounded-full border-4 border-white shadow-xl ring-2 ring-gray-600"
           />
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between">
