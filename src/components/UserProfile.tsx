@@ -360,11 +360,11 @@ return (
           </div>
           <div className="mt-4 sm:mt-0 flex items-center gap-4 text-sm whitespace-nowrap">
             <div className="text-center">
-              <p className="font-bold text-white">1250</p>
+              <p className="font-bold text-white">0</p>
               <p className="text-gray-400">Connections</p>
             </div>
             <div className="text-center">
-              <p className="font-bold text-white">42</p>
+              <p className="font-bold text-white">0</p>
               <p className="text-gray-400">Projects</p>
             </div>
            <button className="bg-yellow-500 text-black px-4 py-2 rounded-lg shadow hover:bg-yellow-400 transition duration-300 font-medium" onClick={() => { setUpdateProfileData({ ...ProfileData }); setModal(true); }} > Edit Profile </button>
