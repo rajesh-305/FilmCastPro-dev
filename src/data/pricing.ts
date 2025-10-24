@@ -113,6 +113,7 @@ export interface Profile {
     socialLink: string| null;
     instagram: string | null;
     id: string | null; 
+    user_id: string | null;
     name: string | null;            
     bio: string | null;             
     location: string | null;       
@@ -125,10 +126,12 @@ export interface Profile {
     signedProfilePhoto : string | null
     signedCoverPhoto : string | null
     skills: string[];
+    clips: Clip[] | null;
 }
 
  export type ProfileData = {
   name: string;
+  user_id: string;
   role: string;
   location: string;
   bio: string;
@@ -145,6 +148,7 @@ export interface Profile {
   dob:string;
   socialLink: string;
   instagram: string;
+  clips: Clip[];
 };
 
 export const DEFAULT_COVER_PHOTO = 'https://https://wallpapers.com/images/hd/minimalist-simple-linkedin-background-inmeafna599ltxxm.jpg.com/default-cover-photo.jpg';
@@ -156,8 +160,6 @@ export const DEFAULT_PROFILE_PHOTO = 'https://example.com/https://www.pngitem.co
     const userId = data.session.user.id;
     const userName = data.session.user.identities?.[0]?.identity_data?.name || "";
     
-    console.log("User ID:", userId);
-    console.log("User Name:", userName);
 
     return [userId, userName];
     }
@@ -177,7 +179,12 @@ export const getSignedUrl = async (bucketName: string, filePath: string) => {
     console.error("Error generating signed URL:", error.message);
     return null;
   }
-  console.log("Signed URL data:", data);
-
   return data?.signedUrl || null;
 };
+export interface Clip {
+    id: number;
+    storagepath: string;
+    title: string;
+    duration: number; // Stored in seconds
+    signedUrl: string; // The temporary URL for playback
+}

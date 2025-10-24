@@ -193,7 +193,7 @@ const order: Record<plan, number> = {
                     <span className="text-sm">{profile.experience?.length} projects</span>
                   </div>
                   <button className="bg-yellow-400 text-gray-900 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-yellow-300 transition-colors" onClick={()=>{
-                    navigate(`/profile/${profile.id}`,{
+                    navigate(`/profile/${profile.id}/${profile.name}`,{
                       state: { ProfileData: profile }
                     });
                   }} >

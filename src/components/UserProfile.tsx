@@ -1,90 +1,247 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./UserProfile.css";
 import { supabase } from "../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
-import { ProfileData,checkSession,getSignedUrl} from "../data/pricing";
+import { ProfileData, checkSession, getSignedUrl,Clip } from "../data/pricing";
+
+// Define a type for the video upload status
+type UploadStatus = 'idle' | 'uploading' | 'done' | 'error';
 
 export const UserProfile: React.FC = () => {
+  const [modalVideoUrl, setModalVideoUrl] = useState<string | null>(null);
+  const closeModal = () => {
+        setModalVideoUrl(null);
+    };
+    const openModal = (url: string) => {
+        console.log("Opening modal for URL:", url);
+        setModalVideoUrl(url);
+    };
+    const navigate = useNavigate();
+    const [ProfileData, setProfileData] = useState<ProfileData>({
+        // ... (rest of your ProfileData state initialization)
+        name: "",
+        role: "",
+        location: "",
+        bio: "",
+        headline: "",
+        coverPhoto: "",
+        profilePhoto: "",
+        experience: [],
+        skills: [],
+        education: [],
+        plan: "",
+        email:"",
+        gender:"",
+        phone:"",
+        dob:"",
+        socialLink: "",
+        instagram:"",
+        clips: [],
+    });
 
-  const navigate = useNavigate();
-  const [ProfileData, setProfileData] = useState<ProfileData>({
-    name: "",
-    role: "",
-    location: "",
-    bio: "",
-    headline: "",
-    coverPhoto: "",
-    profilePhoto: "",
-    experience: [],
-    skills: [],
-    education: [],
-    plan: "",
-    email:"",
-    gender:"",
-    phone:"",
-    dob:"",
-    socialLink: "",
-    instagram:""
-  });
+    // === NEW STATE FOR UPLOAD MANAGEMENT ===
+    const [uploadState, setUploadState] = useState<UploadStatus>('idle');
+    const [showUploadModal, setShowUploadModal] = useState(false);
+    // ======================================
 
-
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
 const fetchData = async () => {
-  const loginId = await checkSession();
-  const userId = loginId?.[0];
+    const loginId = await checkSession();
+    const userId = loginId?.[0];
+    const storageBucketName = "uservideos"; 
 
-  if (!userId) {
-    console.log("No active session");
-    return;
-  }
-
-  console.log("Logged in user ID:", userId);
-
-  const { data, error: profileError } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("user_id", userId)
-    .single();
-    let finalProfileData = data;
-  if (profileError) {
-        const { data, error } = await supabase.from("profiles").upsert(
-        {
-            user_id: userId,
-            name: loginId?.[1],
-        },
-        { onConflict: "user_id" })
-        .select()
-        .single();
-        if (error) {
-          console.error("Upsert error:", error.message);
-          return;
-        }
-        finalProfileData = data;
-        console.log("Final Profile Data:", data);
+    if (!userId) {
+        console.log("No active session");
+        return;
     }
-      const profilePhotoUrl = finalProfileData.profilePhoto
+
+    const { data, error: profileError } = await supabase
+        .from("profiles")
+        .select(`
+            *,
+            clips (
+                id, 
+                storagepath,
+                title,
+                duration
+            )
+        `)
+        .eq("user_id", userId)
+        .single();
+        
+    let finalProfileData = data;
+    
+    if (profileError && profileError.code === 'PGRST116') {
+        console.log("Profile not found, performing upsert.");
+        const { data: upsertData, error: upsertError } = await supabase.from("profiles").upsert(
+            {
+                user_id: userId,
+                name: loginId?.[1] || 'New User', // Use a default name if loginId[1] is missing
+            },
+            { onConflict: "user_id" })
+            .select(`
+                *,
+                clips (
+                    id, 
+                    storagepath,
+                    title,
+                    duration
+                )
+            `) 
+            .single();
+            
+        if (upsertError) {
+            console.error("Upsert error:", upsertError.message);
+            return;
+        }
+        finalProfileData = upsertData;
+    } else if (profileError) {
+        console.error("General profile fetch error:", profileError.message);
+    }
+    
+    if (!finalProfileData) {
+        setProfileData({
+            name: "", role: "", location: "", bio: "", headline: "", coverPhoto: "", profilePhoto: "", 
+            experience: [], skills: [], education: [], plan: "", email:"", gender:"", phone:"", dob:"", 
+            socialLink: "", instagram:"", clips: []
+        });
+        return;
+    }
+
+    const fetchedClips: Clip[] = (finalProfileData.clips as Clip[]) || [];
+    const clipsWithUrls: Clip[] = [];
+    
+
+    for (const clip of fetchedClips) {
+        let signedUrl = "";
+        if (clip?.storagepath) {
+            signedUrl = await getSignedUrl(storageBucketName, clip.storagepath) ?? ""; 
+        }
+        
+        clipsWithUrls.push({
+            ...clip,
+            signedUrl: signedUrl
+        });
+    }
+
+    // 4. Process Profile Photos
+    const profilePhotoUrl = finalProfileData.profilePhoto
         ? await getSignedUrl("profile-photos", finalProfileData.profilePhoto)?? "" : "";
-      const coverPhotoUrl = finalProfileData.coverPhoto
-      ? await getSignedUrl("cover-photos", finalProfileData.coverPhoto)?? "" : "";
-      const completeProfileData = {
-    ...finalProfileData,
-    profilePhoto: profilePhotoUrl,
-    coverPhoto: coverPhotoUrl,
+    const coverPhotoUrl = finalProfileData.coverPhoto
+        ? await getSignedUrl("cover-photos", finalProfileData.coverPhoto)?? "" : "";
+        
+    // 5. Create Final Data Object and Update State
+    const completeProfileData = {
+        ...finalProfileData,
+        profilePhoto: profilePhotoUrl,
+        coverPhoto: coverPhotoUrl,
+        clips: clipsWithUrls, // Use the processed array with signed URLs
+    };
+    
+    console.log("Complete Profile Data:", completeProfileData);
+
+    setProfileData(completeProfileData as ProfileData);
 };
 
+    // === UPLOAD HANDLER FUNCTION ===
+    const uploadVideo = async (file: File) => {
+        const loginId = await checkSession();
+        const userId = loginId?.[0];
 
-    console.log("Final Profile Data (Fetched):", data);
+        if (!userId) {
+            alert("You must be logged in to upload a video.");
+            return;
+        }
 
-    setProfileData(completeProfileData);
-  
-  }
+        setUploadState('uploading');
+        setShowUploadModal(true);
+
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${file.name.substring(0, 10)}.${fileExt}`;
+        const filePath = `${userId}/${fileName}`; 
+        try {
+            const { error: uploadError } = await supabase.storage
+                .from('uservideos')
+                .upload(filePath, file, {
+                    cacheControl: '3600',
+                    upsert: false
+                });
+
+            if (uploadError) {
+                throw uploadError;
+            }
+
+            const { error: dbError } = await supabase
+            .from('clips')
+            .insert({ 
+                user_id: userId, 
+                storagepath: filePath,
+                title: file.name, 
+            });
+
+        if (dbError) {
+            await supabase.storage.from('').remove([filePath]);
+            throw dbError;
+        }
+
+            setUploadState('done');
+            fetchData(); 
+
+        } catch (error: unknown) {
+            let errorMessage = "An unknown error occurred during video upload.";
+
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            } else if (
+                typeof error === 'object' && 
+                error !== null && 
+                'message' in error
+            ) {
+                errorMessage = (error as { message: string }).message;
+            }
+            
+            setUploadState('error');
+            console.error("Video upload error:", errorMessage);
+            alert(`Upload failed: ${errorMessage}`);
+
+        }
+    };
+
+    
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            uploadVideo(file);
+        }
+        
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    // Handler to close the modal and reset status
+    const handleCloseModal = () => {
+        setShowUploadModal(false);
+        setUploadState('idle');
+    };
+
+    // ... (rest of your useEffect)
+    useEffect(() => {
+        fetchData();
+    }, []);
 
 
-
-
-  useEffect(() => {
-    fetchData();
-  }, []);
+    const formatDuration = (seconds: number | undefined): string => {
+    if (typeof seconds !== 'number' || seconds <= 0) return "0:00";
+    
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    
+    const paddedSeconds = remainingSeconds.toString().padStart(2, '0');
+    console.log(`Formatting duration: ${seconds} seconds as ${minutes}:${paddedSeconds}`);
+    return `${minutes}:${paddedSeconds}`;
+};
 
 
 return (
@@ -204,7 +361,99 @@ return (
         ))}
       </div>
     </div>)}
+<div className="mt-6 bg-gray-800 p-6 rounded-lg shadow-lg">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-white text-xl font-bold">Video Showcase</h3>
+                            
+                            {/* 1. Hidden File Input */}
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                accept="video/*" // Restrict to video files
+                                style={{ display: 'none' }} 
+                            />
+                            
+                            {/* 2. Button to trigger the hidden file input */}
+                            <button 
+                                className="text-black bg-yellow-500 rounded-full w-8 h-8 flex items-center justify-center font-bold text-2xl hover:bg-yellow-400 transition duration-300"
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={uploadState === 'uploading'} // Disable if already uploading
+                            >
+                                +
+                            </button>
+                        </div>
 
+                        {/* === Video Upload Modal (CONDITIONAL RENDERING) === */}
+                        {showUploadModal && (
+                            <div className="mt-4 p-4 rounded-lg shadow-xl"
+                                style={{ 
+                                    backgroundColor: uploadState === 'done' ? 'rgb(22 163 74)' : 
+                                                     uploadState === 'error' ? 'rgb(185 28 28)' : 
+                                                     'rgb(55 65 81)' 
+                                }}
+                            >
+                                <div className="flex justify-between items-center text-white">
+                                    <p className="font-semibold">
+                                        {uploadState === 'uploading' && "Uploading Video... Please wait."}
+                                        {uploadState === 'done' && "✅ Upload Successful!"}
+                                        {uploadState === 'error' && "❌ Upload Failed."}
+                                    </p>
+                                    <button 
+                                        className="text-white font-bold py-1 px-3 rounded"
+                                        onClick={handleCloseModal}
+                                        // Close button is disabled ONLY while uploading
+                                        disabled={uploadState === 'uploading'} 
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                                {uploadState === 'uploading' && (
+                                    <div className="mt-2 w-full bg-gray-600 rounded-full h-2.5">
+                                        <div className="bg-yellow-400 h-2.5 rounded-full animate-pulse" style={{ width: '100%' }}></div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        {/* ==================================================== */}
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+          {ProfileData.clips?.length && ProfileData.clips.length > 0 ? (
+              ProfileData.clips.map((clip) => (
+                  <div 
+                      key={clip.id} 
+                      className="relative aspect-video rounded-lg overflow-hidden bg-gray-700 cursor-pointer shadow-md"
+                      // === ADD ONCLICK HANDLER HERE ===
+                      onClick={() => openModal(clip.signedUrl)} 
+                      // ================================
+                  >
+                      {/* Use the signedUrl as the source for the video player */}
+                      <video 
+                          src={clip.signedUrl} 
+                          poster="https://placehold.co/400x225/374151/ffffff?text=Video+Clip" 
+                          className="w-full h-full object-cover"
+                          controls={false} // Thumbnail view, no controls
+                      />
+                      
+                      <div className="absolute inset-x-0 bottom-0 bg-black bg-opacity-50 p-2">
+                          <div className="flex justify-between items-center">
+                              {/* Display the title (which is the original filename) */}
+                              <p className="text-white text-sm font-medium truncate">{clip.title || "Untitled Clip"}</p>
+                              
+                              {/* Display the formatted duration */}
+                              <span className="text-xs text-gray-300 ml-2 bg-gray-900 px-1.5 py-0.5 rounded">
+                                  {formatDuration(clip.duration)} 
+                              </span>
+                          </div>
+                      </div>
+                  </div>
+              ))
+          ) : (
+              <p className="text-gray-400 col-span-4">No videos in the showcase yet. Click the + button to upload your first clip!</p>
+          )}
+      </div>
+                    </div>
+          {/* =================================================================================== */}
           {/* ======================= Skills & Expertise Section ======================= */}
           <div className="mt-6 bg-gray-800 p-6 rounded-lg shadow-lg">
             <h3 className="text-white text-xl font-bold mb-4">Skills & Expertise</h3>
@@ -246,6 +495,48 @@ return (
 
         </div>
       </div>
+      {/* ======================= Fullscreen Video Modal ======================= */}
+{modalVideoUrl && (
+    <div 
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8"
+        // Close modal when clicking on the dimmed background
+        onClick={closeModal}
+    >
+        {/* Backdrop with Blur and Dimming */}
+        <div 
+            className="absolute inset-0 bg-black bg-opacity-80 backdrop-filter backdrop-blur-md"
+        ></div>
+
+        {/* Modal Content / Video Container */}
+        <div 
+            className="relative max-w-4xl w-full max-h-full bg-gray-900 rounded-xl shadow-2xl overflow-hidden"
+            // Prevent clicks on the video container from closing the modal
+            onClick={(e) => e.stopPropagation()} 
+        >
+            {/* Close Button */}
+            <button
+                onClick={closeModal}
+                className="absolute top-2 right-2 text-white text-4xl font-light z-50 p-2 hover:text-yellow-400 transition"
+                aria-label="Close video player"
+            >
+                &times;
+            </button>
+
+            {/* Video Player */}
+            <div className="relative aspect-video w-full">
+                <video
+                    // Key forces video re-render and ensures video starts playing
+                    key={modalVideoUrl} 
+                    src={modalVideoUrl}
+                    className="w-full h-full object-contain"
+                    controls 
+                    autoPlay // Start playing automatically
+                />
+            </div>
+        </div>
+    </div>
+)}
+{/* Closing tags for the UserProfile component's return */}
     </>
   );
 };

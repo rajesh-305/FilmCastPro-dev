@@ -3,7 +3,7 @@ import { Film, Menu, X, Search } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {Profile} from './BrowsePage';
+import {Profile} from '../data/pricing';
 import { getSignedUrl } from '../data/pricing';
 
 
@@ -44,8 +44,6 @@ export const Header: React.FC = () => {
       signedProfilePhoto: signedProfilePhotoURL,
       signedCoverPhoto: signedCoverPhotoURL,
     };
-
-    console.log('Final user data with signed URLs:', finalProfileData);
     setProfile(finalProfileData);
   };
 

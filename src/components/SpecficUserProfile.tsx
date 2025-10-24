@@ -2,6 +2,7 @@
 import './SpecficUserProfile.css';
 import { useLocation } from "react-router-dom";
 import { Profile } from "../data/pricing";
+import { useNavigate } from 'react-router-dom';
 import {
   MapPin,
   Mail,
@@ -17,6 +18,7 @@ interface LocationState {
 }
 
 const SpecficUserProfile: React.FC = () => {
+  const navigate = useNavigate();
   const location = useLocation();
   const receivedData = (location.state as LocationState)?.ProfileData;
   console.log("Received Data:", receivedData);
@@ -112,7 +114,13 @@ const SpecficUserProfile: React.FC = () => {
                 <UserPlus className="w-4 h-4" />
                 Connect
               </button>
-              <button className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-black text-white text-sm hover:bg-gray-800 transition">
+              <button className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-black text-white text-sm hover:bg-gray-800 transition"
+                onClick={() => {
+                  navigate(`/userprofile/${receivedData?.id}/${receivedData?.name}/filmreels`, {
+                    state: { ProfileData: receivedData }
+                  });
+                }}
+              >
                 View Film Reel
               </button>
               <button className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-600 text-gray-100 text-sm hover:bg-gray-700 transition">
